@@ -1,12 +1,7 @@
-# File: WordleAssistant.py
-# Student: Haoliang Hu
-# UT EID: hh27683
-# Course Name: CS303E
-# 
 # Date: 04/15/2022
 # Description of Program: 
-# This program provides hints for Wordle. The user can input information and the program will provide some possible solutions 
-# to the Wordle the user is solving. 
+# This program provides hints for Wordle. The user can input information and 
+# the program will provide some possible solutions to the Wordle the user is solving. 
 
 import os.path
 

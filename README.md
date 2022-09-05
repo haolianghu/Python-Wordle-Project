@@ -7,4 +7,5 @@ Symbol ^ means that the letter is correct and in the correct location <br>
 Symbol + means that the letter is correct, but in the wrong location <br>
 
 WordleAssistant.py is a tool that can help find potential solutions for a Wordle game. <br>
+
 Wordlist.txt is an example word list file that can be used for the game.

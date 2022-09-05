@@ -1,8 +1,3 @@
-# File: Project3.py
-# Student: Haoliang Hu
-# UT EID: hh27683
-# Course Name: CS303E
-# 
 # Date: 04-30-2022
 # Description of Program: this program implement a version of Wordle. 
 # The answer will be a 5-letter word that is selected randomly from a wordlist (if not specified). 

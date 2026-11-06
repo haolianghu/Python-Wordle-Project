@@ -4,44 +4,11 @@
 # the program will provide some possible solutions to the Wordle the user is solving. 
 
 import os.path
+from wordle_common import create_wordlist, feedback
 
 def createWordlist(filename): 
-    """" 
-    This function:
-    Reads words from the word list and store them in a list.
-    The file contains only lowercase ascii characters, are sorted alphabetically, one word per line. 
-    Filters out any words that are not 5 letters long, have duplicate letters, or end in 's'.  
-    Returns the list of words and the number of words as a pair. 
-    """
-
-    allWords = open(filename, 'r')
-    line = allWords.readline()
-    list1 = []
-    count = 0
-
-    #Read all the words from the other file
-    while line:
-        line.strip()
-        list1.append(line)
-        line = allWords.readline()
-    
-    #Remove \n from each of the item in the list
-    list2 = [word[:-1] for word in list1]
-    wordlist =[]
-
-    #Filter out the words
-    for word in list2:
-        #Check if is 5 letters
-        if len(word) == 5:
-            #Check if end with s
-            if word.endswith('s') == False:
-                #Check if there are any repeating letters
-                if len(word) == len(set(word)):
-                    wordlist.append(word)
-                    count += 1
-    
-    allWords.close()
-    return wordlist
+    """Load playable words from a file."""
+    return create_wordlist(filename)
 
 def containsAll(wordlist, include):
     """ Given wordlist, return a set of all words from the wordlist
@@ -55,7 +22,7 @@ def containsAll(wordlist, include):
             for item in set(include):
                 if letter == item:
                     sameCount += 1
-        if sameCount == len(include):
+        if sameCount == len(set(include)):
             setinclude.add(word)
          
     return setinclude
@@ -116,12 +83,19 @@ def getPossibleWords(wordlist, posInfo, include, exclude):
     * contains none of the letters from string exclude.
     """
 
-    solution = set()
-    for word in containsAtPositions( wordlist, posInfo):
-        if word in containsAll( wordlist, include) and word in containsNone( wordlist, exclude):
-            solution.add(word)
+    return (containsAtPositions(wordlist, posInfo)
+            & containsAll(wordlist, include)
+            & containsNone(wordlist, exclude))
 
-    return solution
+
+def filter_by_feedback(wordlist, guess, pattern):
+    """Return candidates consistent with a five-symbol feedback pattern."""
+    guess = guess.lower()
+    if len(guess) != 5 or not guess.isascii() or not guess.isalpha():
+        raise ValueError("Guess must be five ASCII letters.")
+    if len(pattern) != 5 or not set(pattern) <= {"x", "+", "^"}:
+        raise ValueError("Feedback must contain five symbols: x, +, or ^.")
+    return {word for word in wordlist if feedback(word, guess) == pattern}
     
 #For testing:
 #wordlist= createWordlist( 'Wordlist.txt' )
@@ -153,6 +127,19 @@ def main():
     characters_exclude = input("Enter the characters to exclude (e.g. abc or empty string if none): ")
 
     #Call the previous function to find the potential solutions
-    print(getPossibleWords(wordlist, dictionary, characters_include, characters_exclude))
+    candidates = getPossibleWords(wordlist, dictionary, characters_include, characters_exclude)
+    print("Candidates:", ", ".join(sorted(candidates)) or "(none)")
+    while True:
+        guess = input("Enter a previous guess to filter by feedback (or press Enter to finish): ").strip()
+        if not guess:
+            break
+        pattern = input("Enter its five feedback symbols (x, +, ^): ").strip()
+        try:
+            candidates = filter_by_feedback(candidates, guess, pattern)
+        except ValueError as exc:
+            print(exc)
+            continue
+        print("Candidates:", ", ".join(sorted(candidates)) or "(none)")
 
-main()
+if __name__ == "__main__":
+    main()

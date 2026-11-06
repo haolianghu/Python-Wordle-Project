@@ -4,40 +4,11 @@
 
 import os.path
 import random
+from wordle_common import create_wordlist, feedback
 
 def createWordlist(filename): 
-    """
-    This function:
-    Reads words from the word list file and store them in a list.
-    The file contains only lowercase ascii characters, are sorted alphabetically, one word per line. 
-    Filters out any words that are not 5 letters long, have duplicate letters, or end in 's'.  
-    Returns the list of words and the number of words as a pair. 
-    """
-
-    allWords = open(filename, 'r')
-    line = allWords.readline()
-    list1 = []
-    #Read all the words from the word list file
-    while line:
-        line.strip()
-        list1.append(line)
-        line = allWords.readline()
-    
-    #Remove \n from each of the item in the list
-    list2 = [word[:-1] for word in list1]
-    wordlist =[]
-    #Filter out the words
-    for word in list2:
-        #Check if is 5 letters
-        if len(word) == 5:
-            #Check if end with s
-            if word.endswith('s') == False:
-                #Check if there are any repeating letters
-                if len(word) == len(set(word)):
-                    wordlist.append(word)
-    
-    allWords.close()
-    return wordlist
+    """Load playable words from a file."""
+    return create_wordlist(filename)
 
 def BinarySearch ( lst , key ):
     """ Search for key in sorted list lst. """ 
@@ -77,6 +48,9 @@ def playWordle(answer = None):
         print("File does not exist. Try again!")
         filename = input("Enter the name of the file from which to extract the wordlist: ")
     wordlist = createWordlist(filename)
+    if not wordlist:
+        print("The file contains no playable words.")
+        return
 
     #Set the answer word to be random if not specified
     answerLegal = True
@@ -94,45 +68,18 @@ def playWordle(answer = None):
     while answerLegal == True and attempts <= 6 and win == False:
         guess = input("Enter your guess " + "(" + str(attempts) + "): ")
         guess = guess.lower()
-        while len(guess) > 5 or BinarySearch(wordlist, guess) == None:
+        while len(guess) != 5 or BinarySearch(wordlist, guess) == None:
             print("Guess must be a 5-letter word in the wordlist. Try again!")
             guess = input("Enter your guess " + "(" + str(attempts) + "): ")
             guess = guess.lower()
 
         #Show the players the characters they got correct and wrong
-        result = []
-        for letter in guess:
-            previousLength = len(result)
-            answerIndex = -1
-            guessIndex = -1
-            for character in answer:
-                answerIndex += 1
-                guessIndex += 1
-                if letter == character:
-                    if guess[guessIndex] == answer[answerIndex]:
-                        result.append('^')
-                    else:
-                        result.append('+')
-            if previousLength == len(result):
-                result.append('x')
-
-        resultString = ""
-        for item in result:
-            resultString += '  ' + item
-        
-        guessString = ""
-        for letter in guess:
-            guessString += '  ' + letter.upper()
-
-        print(guessString[2:])
-        print(resultString[2:])
+        result = feedback(answer, guess)
+        print("  ".join(guess.upper()))
+        print("  ".join(result))
 
         #Check if the player has all characters guessed correctly and print results
-        count = 0 
-        for letter in resultString:
-            if letter == '^':
-                count += 1
-        if count == 5:
+        if result == "^^^^^":
             print ("CONGRATULATIONS! You win!")
             win = True
     
@@ -143,4 +90,5 @@ def playWordle(answer = None):
         print("Sorry! The word was", answer + '.', "Better luck next time!")
         print()
 
-playWordle()
+if __name__ == "__main__":
+    playWordle()
